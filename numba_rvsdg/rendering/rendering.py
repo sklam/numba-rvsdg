@@ -145,7 +145,7 @@ class ByteFlowRenderer(object):
         self.bcmap: Dict[int, dis.Instruction] = SCFG.bcmap_from_bytecode(bc)
 
 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
 
 def render_func(func):
