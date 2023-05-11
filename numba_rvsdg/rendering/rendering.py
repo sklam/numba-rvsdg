@@ -51,8 +51,12 @@ class ByteFlowRenderer(object):
             )
         elif isinstance(label, ControlLabel):
             body = label.__class__.__name__ + ": " + str(label.index)
+        elif isinstance(label, Label):
+            body = label.__class__.__name__ + ": " + str(label.index)
+            body += "\l" + str(block)
         else:
             raise Exception("Unknown label type: " + label)
+
         digraph.node(str(label), shape="rect", label=body)
 
     def render_control_variable_block(
@@ -98,6 +102,8 @@ class ByteFlowRenderer(object):
             self.render_branching_block(digraph, label, block)
         elif type(block) == RegionBlock:
             self.render_region_block(digraph, label, block)
+        elif isinstance(block, BasicBlock):
+            self.render_basic_block(digraph, label, block)
         else:
             raise Exception("unreachable")
 
@@ -105,18 +111,13 @@ class ByteFlowRenderer(object):
         for label, block in blocks.items():
             for dst in block.jump_targets:
                 if dst in blocks:
-                    if type(block) in (
-                        PythonBytecodeBlock,
-                        BasicBlock,
-                        ControlVariableBlock,
-                        BranchBlock,
-                    ):
-                        self.g.edge(str(label), str(dst))
-                    elif type(block) == RegionBlock:
+                    if type(block) == RegionBlock:
                         if block.exiting is not None:
                             self.g.edge(str(block.exiting), str(dst))
                         else:
                             self.g.edge(str(label), str(dst))
+                    elif isinstance(block, BasicBlock):
+                        self.g.edge(str(label), str(dst))
                     else:
                         raise Exception("unreachable")
             for dst in block.backedges:
