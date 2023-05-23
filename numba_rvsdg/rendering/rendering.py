@@ -84,11 +84,12 @@ class ByteFlowRenderer(object):
 
             body = label.__class__.__name__ + ": " + str(label.index) + "\l"
             body += f"variable: {block.variable}\l"
-            body += "\l".join(
-                (f"{k}=>{find_index(v)}" for k, v in block.branch_value_table.items())
-            )
+            if block.branch_value_table:
+                body += "\l".join(
+                    (f"{k}=>{find_index(v)}" for k, v in block.branch_value_table.items())
+                )
         else:
-            raise Exception("Unknown label type: " + label)
+            raise Exception("Unknown label type: " + str(label))
         digraph.node(str(label), shape="rect", label=body)
 
     def render_block(self, digraph: "Digraph", label: Label, block: BasicBlock):
