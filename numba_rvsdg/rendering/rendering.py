@@ -50,7 +50,7 @@ class ByteFlowRenderer(object):
                 [f"{inst.offset:3}: {inst.opname}" for inst in instlist] + [""]
             )
         else:
-            body = name + "\l"
+            body = name + "\l" + str(block)
 
         digraph.node(str(name), shape="rect", label=body)
 
@@ -92,6 +92,8 @@ class ByteFlowRenderer(object):
             self.render_basic_block(digraph, name, block)
         elif type(block) == RegionBlock:
             self.render_region_block(digraph, name, block)
+        elif isinstance(block, BasicBlock):
+            self.render_basic_block(digraph, name, block)
         else:
             raise Exception("unreachable")
 
@@ -99,23 +101,13 @@ class ByteFlowRenderer(object):
         for name, block in blocks.items():
             for dst in block.jump_targets:
                 if dst in blocks:
-                    if type(block) in (
-                        PythonBytecodeBlock,
-                        BasicBlock,
-                        SyntheticBlock,
-                        SyntheticAssignment,
-                        SyntheticExitingLatch,
-                        SyntheticExitBranch,
-                        SyntheticHead,
-                        SyntheticExit,
-                        SyntheticBranch,
-                    ):
-                        self.g.edge(str(name), str(dst))
-                    elif type(block) == RegionBlock:
+                    if type(block) == RegionBlock:
                         if block.exiting is not None:
                             self.g.edge(str(block.exiting), str(dst))
                         else:
                             self.g.edge(str(name), str(dst))
+                    elif isinstance(block, BasicBlock):
+                        self.g.edge(str(name), str(dst))
                     else:
                         raise Exception("unreachable " + str(block))
             for dst in block.backedges:
@@ -144,7 +136,7 @@ class ByteFlowRenderer(object):
         self.bcmap: Dict[int, dis.Instruction] = SCFG.bcmap_from_bytecode(bc)
 
 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
 
 def render_func(func):
