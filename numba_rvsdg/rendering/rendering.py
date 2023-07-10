@@ -50,8 +50,10 @@ class BaseRenderer:
             self.render_basic_block(digraph, name, block)
         elif type(block) == RegionBlock:
             self.render_region_block(digraph, name, block)
+        elif isinstance(block, BasicBlock):
+            self.render_basic_block(digraph, name, block)
         else:
-            raise Exception("unreachable")
+            raise Exception(f"unreachable: {type(block)}")
 
     def render_edges(self, scfg: SCFG):
         """Function that renders the edges in an SCFG.
@@ -292,7 +294,7 @@ class SCFGRenderer(BaseRenderer):
         self.g.view(name)
 
 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
 
 def render_func(func):
